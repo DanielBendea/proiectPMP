@@ -3,17 +3,53 @@ const int buton1 = 2;          // fiecare buton ii va corespunde un bec led galb
 const int buton2 = 3;         
 const int buton3 = 4;          
 const int buton4 = 5;       
-const int bec1 = 6;
-const int bec2 = 7;  
-const int bec3 = 8;        
-const int bec4 = 9;
+const int bec1 = 7;
+const int bec2 = 8;  
+const int bec3 = 9;        
+const int bec4 = 10;
    
-const int buz = 10;           // buzzerul va suna la fiecare apasare de buton/aprindeere de led
+const int buz = 12;           // buzzerul va suna la fiecare apasare de buton/aprindeere de led
 const int sunet[] = {};       // sunetul pe care il va face buzzerul
+
+
+
+//// Variabile de debugging
+int ok = 0;
+int but;
+
+//// Variabile program
+int i;
+
+//typedef struct {
+  int stareButoane[] = {0, 0, 0, 0};
+
+  int vecSequence[25];
+  int nrSequence;
+  
+  int nLevel;
+  int nCurentLevel;
+
+  int becDelay;
+  int becTime = 500;
+  int speedFactor = 5;
+  
+  int timpAsteptareApasareButon = 300;
+  
+  int gameOn;
+//}GAME_STAT;
+//GAME_STAT gameState;
 
 // initializarea variabilelor de mai sus
 void setup() {
   // put your setup code here, to run once:
+  // variabilele
+  gameState.nrSequence = 1;
+  
+  gameState.nLevel = 15;
+  gameState.nCurentLevel = 1;
+  
+  gameState.gameOn = 1;
+  
   // butoanele
   pinMode(buton1, INPUT);
   pinMode(buton2, INPUT);
@@ -29,18 +65,6 @@ void setup() {
   
   Serial.begin(9600);
 }
-
-
-//// Variabile de debugging
-int ok = 0;
-int but;
-
-//// Variabile program
-int becAprins = 300;
-int timpAsteptareApasareButon = 300;
-int i;
-
-int stareButoane[] = {0, 0, 0, 0};
 
 void sunetBuzz(int ton, int timp) {
   for(long i = 0; i < timp * 1500L; i = i + ton) {
@@ -81,8 +105,36 @@ void refreshGameSequence(int v[], int n) {
   }
 }
 
+void showSequence() {
+  delay (200);
+  for (i = 0; i < currentlevel; i= i + 1){
+    becDelay = becTime/(1+(speedFactor/nLevel)*(nCurentLevel - 1));
+    
+    digitalWrite(vecSequence[i]+7, HIGH);
+    sunetBuzz(tones[vecSequence[i]], becDelay);
+    digitalWrite(vecSequence[i]+7, LOW);
+    
+    delay(150/speedfactor);
+  }
+}
+
+void evaluateSequence() {
+  int j = 0;
+  int butonApasat = 0;
+  while(j < nCurentLevel) {
+    while(butonApasat == 0) {
+      for(i = 0;i < 4; i++) {
+        stareButoane[i] = digitalRead(i+2);
+        if(stareButoane[i] > 0) {
+          butonPasat++;
+          break;
+        }
+      }
+    }
+  }
+}
+
 void testWindow() {
-  // put your main code here, to run repeatedly:
   //// test led
   //digitalWrite(6, HIGH);
   //delay(100);
@@ -125,5 +177,6 @@ void testWindow() {
 }
 
 void loop() {
+  // put your main code here, to run repeatedly:
   testWindow();
 }
